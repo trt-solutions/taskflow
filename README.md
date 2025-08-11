@@ -35,12 +35,6 @@ A modern, responsive project management application built with vanilla HTML, CSS
 - Vanilla JavaScript
 - SVG Icons
 
-## 📸 Screenshots
-
-![Dashboard](docs/screenshots/dashboard.png)
-![Projects](docs/screenshots/projects.png)
-![Kanban Board](docs/screenshots/kanban.png)
-
 ## 🔧 Development
 
 To modify or extend TaskFlow:
