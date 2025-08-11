@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow - Project Management Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Aptos Narrow', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #003768 0%, #E8E8E8 100%);
+            background-attachment: fixed;
+            color: #003768;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+            backdrop-filter: blur(20px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(0, 55, 104, 0.95);
+            backdrop-filter: blur(20px);
+            color: #E8E8E8;
+            padding: 1rem 0;
+            flex-shrink: 0;
+            border-right: 1px solid rgba(232, 232, 232, 0.1);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            padding: 0 1.5rem 2rem;
+            font-size: 1.8rem;
+            font-weight: 800;
+            border-bottom: 1px solid rgba(232, 232, 232, 0.1);
+            background: linear-gradient(135deg, #003768, #E8E8E8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo svg {
+            background: linear-gradient(135deg, #003768, #E8E8E8);
+            -webkit-mask: url('data:image/svg+xml;base64,...') no-repeat;
+            mask: url('data:image/svg+xml;base64,...') no-repeat;
+            flex-shrink: 0;
+        }
+
+        .nav-item svg {
+            flex-shrink: 0;
+            stroke: currentColor;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 1.5rem 0;
+        }
+
+        .nav-item {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-radius: 0 25px 25px 0;
+            margin-right: 1rem;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: rgba(232, 232, 232, 0.2);
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #003768, #E8E8E8);
+            box-shadow: 0 4px 15px rgba(0, 55, 104, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .breadcrumb {
+            font-size: 0.95rem;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: #1a202c;
+            background: linear-gradient(135deg, #1a202c, #4a5568);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(237, 242, 247, 0.8);
+            color: #4a5568;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(226, 232, 240, 0.9);
+            transform: translateY(-1px);
+        }
+
+        /* Dashboard Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1a202c;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Project Cards */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .project-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .project-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .project-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1.5rem;
+        }
+
+        .project-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .project-status {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+
+        .status-completed {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(237, 242, 247, 0.8);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .project-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .team-avatars {
+            display: flex;
+            margin-left: -0.5rem;
+        }
+
+        .team-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid white;
+            margin-left: -0.5rem;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .avatar-1 { background: linear-gradient(135deg, #003768, #E8E8E8); color: #E8E8E8; }
+        .avatar-2 { background: linear-gradient(135deg, #E8E8E8, #003768); color: #003768; }
+        .avatar-3 { background: linear-gradient(135deg, #003768, #E8E8E8); color: #E8E8E8; }
+        .avatar-4 { background: linear-gradient(135deg, #E8E8E8, #003768); color: #003768; }
+
+        /* Kanban Board */
+        .kanban-board {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+
+        .kanban-column {
+            min-width: 320px;
+            background: rgba(247, 250, 252, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            font-size: 1.1rem;
+        }
+
+        .task-count {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .task-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .task-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            font-size: 1rem;
+        }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        .task-priority {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .priority-high { 
+            background: linear-gradient(135deg, #E8E8E8, #003768); 
+            color: #003768; 
+        }
+        .priority-medium { 
+            background: linear-gradient(135deg, #003768, #E8E8E8); 
+            color: #E8E8E8; 
+        }
+        .priority-low { 
+            background: linear-gradient(135deg, #E8E8E8, #003768); 
+            color: #003768; 
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 2rem;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #718096;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(237, 242, 247, 0.8);
+            color: #2d3748;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+
+            .sidebar .nav-item span:last-child {
+                display: none;
+            }
+
+            .logo {
+                text-align: center;
+                font-size: 1.2rem;
+                justify-content: center;
+            }
+
+            .logo span {
+                display: none;
+            }
+
+            .content-area {
+                padding: 1rem;
+            }
+
+            .kanban-board {
+                flex-direction: column;
+            }
+
+            .kanban-column {
+                min-width: 100%;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 12l2 2 4-4"/>
+                    <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
+                    <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"/>
+                    <path d="M3 21h18"/>
+                    <path d="M3 3h18"/>
+                    <rect x="5" y="8" width="14" height="8" rx="2"/>
+                </svg>
+                TaskFlow
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" onclick="showView('dashboard')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                    <span>Dashboard</span>
+                </li>
+                <li class="nav-item" onclick="showView('projects')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span>Projects</span>
+                </li>
+                <li class="nav-item" onclick="showView('tasks')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 11l3 3L22 4"/>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                    <span>My Tasks</span>
+                </li>
+                <li class="nav-item" onclick="showView('calendar')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    <span>Calendar</span>
+                </li>
+                <li class="nav-item" onclick="showView('reports')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="20" x2="12" y2="10"/>
+                        <line x1="18" y1="20" x2="18" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="16"/>
+                    </svg>
+                    <span>Reports</span>
+                </li>
+                <li class="nav-item" onclick="showView('settings')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 1v6m0 12v6m11-11h-6M6 12H0"/>
+                        <path d="M20.485 4.929l-4.243 4.242M7.757 16.243L3.514 20.486M20.485 19.071l-4.243-4.242M7.757 7.757L3.514 3.514"/>
+                    </svg>
+                    <span>Settings</span>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="breadcrumb">
+                    <span id="breadcrumb-text">Dashboard</span>
+                </div>
+                <div class="user-menu">
+                    <button class="btn btn-primary" onclick="openTaskModal()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        New Task
+                    </button>
+                    <button class="btn btn-secondary" onclick="createNewProject()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        New Project
+                    </button>
+                    <div class="user-avatar" onclick="showUserMenu()">JD</div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                <!-- Dashboard View -->
+                <div id="dashboard-view">
+                    <div class="page-header">
+                        <h1 class="page-title">Welcome back, John!</h1>
+                        <p style="color: #718096; font-size: 1.1rem; margin-top: 0.5rem;">Here's what's happening with your projects today.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">12</div>
+                            <div class="stat-label">Active Projects</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">84</div>
+                            <div class="stat-label">Tasks Completed</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">23</div>
+                            <div class="stat-label">Tasks In Progress</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">7</div>
+                            <div class="stat-label">Team Members</div>
+                        </div>
+                    </div>
+
+                    <h2 style="margin-bottom: 2rem; color: #2d3748; font-size: 1.5rem; font-weight: 700;">Recent Projects</h2>
+                    <div class="projects-grid">
+                        <div class="project-card" onclick="openProject('marketing')">
+                            <div class="project-header">
+                                <div class="project-title">Marketing Campaign</div>
+                                <div class="project-status status-active">Active</div>
+                            </div>
+                            <p style="color: #718096; margin: 1rem 0; line-height: 1.5;">Q4 marketing campaign to increase brand awareness and drive sales through digital channels.</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 65%"></div>
+                            </div>
+                            <div class="project-meta">
+                                <span>65% complete • Due Dec 15</span>
+                                <div class="team-avatars">
+                                    <div class="team-avatar avatar-1">J</div>
+                                    <div class="team-avatar avatar-2">S</div>
+                                    <div class="team-avatar avatar-3">M</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="project-card" onclick="openProject('website')">
+                            <div class="project-header">
+                                <div class="project-title">Website Redesign</div>
+                                <div class="project-status status-active">Active</div>
+                            </div>
+                            <p style="color: #718096; margin: 1rem 0; line-height: 1.5;">Complete redesign of company website with modern UI/UX and improved performance.</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 40%"></div>
+                            </div>
+                            <div class="project-meta">
+                                <span>40% complete • Due Jan 30</span>
+                                <div class="team-avatars">
+                                    <div class="team-avatar avatar-2">A</div>
+                                    <div class="team-avatar avatar-4">L</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="project-card" onclick="openProject('product')">
+                            <div class="project-header">
+                                <div class="project-title">Product Launch</div>
+                                <div class="project-status status-completed">Completed</div>
+                            </div>
+                            <p style="color: #718096; margin: 1rem 0; line-height: 1.5;">Successful launch of TaskFlow 2.0 with enhanced collaboration features and mobile app.</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 100%"></div>
+                            </div>
+                            <div class="project-meta">
+                                <span>100% complete • Completed Nov 8</span>
+                                <div class="team-avatars">
+                                    <div class="team-avatar avatar-1">J</div>
+                                    <div class="team-avatar avatar-3">K</div>
+                                    <div class="team-avatar avatar-4">R</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project Board View -->
+                <div id="project-view" class="hidden">
+                    <div class="page-header">
+                        <h1 class="page-title" id="project-title">Marketing Campaign</h1>
+                        <div class="page-actions">
+                            <button class="btn btn-secondary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                                </svg>
+                                Share
+                            </button>
+                            <button class="btn btn-secondary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="20" x2="12" y2="10"/>
+                                    <line x1="18" y1="20" x2="18" y2="4"/>
+                                    <line x1="6" y1="20" x2="6" y2="16"/>
+                                </svg>
+                                Analytics
+                            </button>
+                            <button class="btn btn-primary" onclick="openTaskModal()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                Add Task
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="kanban-board">
+                        <div class="kanban-column">
+                            <div class="column-header">
+                                <span>📝 To Do</span>
+                                <span class="task-count">3</span>
+                            </div>
+                            <div class="task-card" onclick="openTaskModal('Create social media assets')">
+                                <div class="task-title">Create social media assets</div>
+                                <div class="task-meta">
+                                    <div class="team-avatar avatar-2">S</div>
+                                    <div class="task-priority priority-high">High</div>
+                                </div>
+                            </div>
+                            <div class="task-card" onclick="openTaskModal('Write blog post')">
+                                <div class="task-title">Write blog post</div>
+                                <div class="task-meta">
+                                    <div class="team-avatar avatar-1">J</div>
+                                    <div class="task-priority priority-medium">Medium</div>
+                                </div>
+                            </div>
+                            <div class="task-card" onclick="openTaskModal('Setup analytics')">
+                                <div class="task-title">Setup analytics tracking</div>
+                                <div class="task-meta">
+                                    <div class="team-avatar avatar-3">M</div>
+                                    <div class="task-priority priority-low">Low</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="kanban-column">
+                            <div class="column-header">
+                                <span>🔄 In Progress</span>
+                                <span class="task-count">2</span>
+                            </div>
+                            <div class="task-card" onclick="openTaskModal('Design landing page')">
+                                <div class="task-title">Design landing page</div>
+                                <div class="task-meta">
+                                    <div class="team-avatar avatar-2">S</div>
+                                    <div class="task-priority priority-high">High</div>
+                                </div>
+                            </div>
+                            <div class="task-card" onclick="openTaskModal('Email campaign')">
+                                <div class="task-title">Setup email campaign</div>
+                                <div class="task-meta">
+                                    <div class="team-avatar avatar-1">J</div>
+                                    <div class="task-priority priority-medium">Medium</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="kanban-column">
+                            <div class="column-header">
+                                <span>👀 Review</span>
+                                <span class="task-count">1</span>
+                            </div>
+                            <div class="task-card" onclick="openTaskModal('Campaign strategy')">
+                                <div class="task-title">Campaign strategy document</div>
+                                <div class="task-meta">
+                                    <div class="team-avatar avatar-3">M</div>
+                                    <div class="task-priority priority-medium">Medium</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="kanban-column">
+                            <div class="column-header">
+                                <span>✅ Done</span>
+                                <span class="task-count">4</span>
+                            </div>
+                            <div class="task-card">
+                                <div class="task-title">Market research</div>
+                                <div class="task-meta">
+                                    <div class="team-avatar avatar-1">J</div>
+                                    <div class="task-priority priority-high">High</div>
+                                </div>
+                            </div>
+                            <div class="task-card">
+                                <div class="task-title">Competitor analysis</div>
+                                <div class="task-meta">
+                                    <div class="team-avatar avatar-3">M</div>
+                                    <div class="task-priority priority-medium">Medium</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projects List View -->
+                <div id="projects-view" class="hidden">
+                    <div class="page-header">
+                        <h1 class="page-title">All Projects</h1>
+                        <div class="page-actions">
+                            <button class="btn btn-secondary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="M21 21l-4.35-4.35"/>
+                                </svg>
+                                Filter
+                            </button>
+                            <button class="btn btn-secondary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7,10 12,15 17,10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                                Export
+                            </button>
+                            <button class="btn btn-primary" onclick="createNewProject()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                New Project
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="projects-grid">
+                        <div class="project-card" onclick="openProject('marketing')">
+                            <div class="project-header">
+                                <div class="project-title">Marketing Campaign</div>
+                                <div class="project-status status-active">Active</div>
+                            </div>
+                            <p style="color: #718096; margin: 1rem 0; line-height: 1.5;">Q4 marketing campaign to increase brand awareness and drive sales through digital channels.</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 65%"></div>
+                            </div>
+                            <div class="project-meta">
+                                <span>65% complete • Due Dec 15</span>
+                                <div class="team-avatars">
+                                    <div class="team-avatar avatar-1">J</div>
+                                    <div class="team-avatar avatar-2">S</div>
+                                    <div class="team-avatar avatar-3">M</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="project-card" onclick="openProject('website')">
+                            <div class="project-header">
+                                <div class="project-title">Website Redesign</div>
+                                <div class="project-status status-active">Active</div>
+                            </div>
+                            <p style="color: #718096; margin: 1rem 0; line-height: 1.5;">Complete redesign of company website with modern UI/UX and improved performance.</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 40%"></div>
+                            </div>
+                            <div class="project-meta">
+                                <span>40% complete • Due Jan 30</span>
+                                <div class="team-avatars">
+                                    <div class="team-avatar avatar-2">A</div>
+                                    <div class="team-avatar avatar-4">L</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="project-card" onclick="openProject('product')">
+                            <div class="project-header">
+                                <div class="project-title">Product Launch</div>
+                                <div class="project-status status-completed">Completed</div>
+                            </div>
+                            <p style="color: #718096; margin: 1rem 0; line-height: 1.5;">Successful launch of TaskFlow 2.0 with enhanced collaboration features and mobile app.</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 100%"></div>
+                            </div>
+                            <div class="project-meta">
+                                <span>100% complete • Completed Nov 8</span>
+                                <div class="team-avatars">
+                                    <div class="team-avatar avatar-1">J</div>
+                                    <div class="team-avatar avatar-3">K</div>
+                                    <div class="team-avatar avatar-4">R</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="project-card" onclick="openProject('mobile')">
+                            <div class="project-header">
+                                <div class="project-title">Mobile App Development</div>
+                                <div class="project-status status-active">Active</div>
+                            </div>
+                            <p style="color: #718096; margin: 1rem 0; line-height: 1.5;">Native mobile apps for iOS and Android platforms with offline capabilities.</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 25%"></div>
+                            </div>
+                            <div class="project-meta">
+                                <span>25% complete • Due Mar 15</span>
+                                <div class="team-avatars">
+                                    <div class="team-avatar avatar-3">D</div>
+                                    <div class="team-avatar avatar-4">T</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="project-card" onclick="openProject('analytics')">
+                            <div class="project-header">
+                                <div class="project-title">Analytics Dashboard</div>
+                                <div class="project-status status-active">Active</div>
+                            </div>
+                            <p style="color: #718096; margin: 1rem 0; line-height: 1.5;">Real-time analytics dashboard for tracking project performance and team productivity.</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 80%"></div>
+                            </div>
+                            <div class="project-meta">
+                                <span>80% complete • Due Dec 1</span>
+                                <div class="team-avatars">
+                                    <div class="team-avatar avatar-2">M</div>
+                                    <div class="team-avatar avatar-3">K</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="project-card" onclick="openProject('security')">
+                            <div class="project-header">
+                                <div class="project-title">Security Audit</div>
+                                <div class="project-status status-active">Active</div>
+                            </div>
+                            <p style="color: #718096; margin: 1rem 0; line-height: 1.5;">Comprehensive security audit and implementation of enhanced security measures.</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 55%"></div>
+                            </div>
+                            <div class="project-meta">
+                                <span>55% complete • Due Jan 15</span>
+                                <div class="team-avatars">
+                                    <div class="team-avatar avatar-1">J</div>
+                                    <div class="team-avatar avatar-4">S</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Tasks View -->
+                <div id="tasks-view" class="hidden">
+                    <div class="page-header">
+                        <h1 class="page-title">My Tasks</h1>
+                        <p style="color: #718096; font-size: 1.1rem; margin-top: 0.5rem;">Tasks assigned to you across all projects</p>
+                        <div class="page-actions">
+                            <button class="btn btn-secondary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="M21 21l-4.35-4.35"/>
+                                </svg>
+                                Filter
+                            </button>
+                            <button class="btn btn-primary" onclick="openTaskModal()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                New Task
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="kanban-board">
+                        <div class="kanban-column">
+                            <div class="column-header">
+                                <span>🔥 High Priority</span>
+                                <span class="task-count">2</span>
+                            </div>
+                            <div class="task-card" onclick="openTaskModal('Review marketing materials')">
+                                <div class="task-title">Review marketing materials</div>
+                                <p style="color: #718096; font-size: 0.9rem; margin: 0.5rem 0;">Marketing Campaign</p>
+                                <div class="task-meta">
+                                    <span>Due: Dec 12</span>
+                                    <div class="task-priority priority-high">High</div>
+                                </div>
+                            </div>
+                            <div class="task-card" onclick="openTaskModal('Security vulnerability assessment')">
+                                <div class="task-title">Security vulnerability assessment</div>
+                                <p style="color: #718096; font-size: 0.9rem; margin: 0.5rem 0;">Security Audit</p>
+                                <div class="task-meta">
+                                    <span>Due: Dec 10</span>
+                                    <div class="task-priority priority-high">High</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="kanban-column">
+                            <div class="column-header">
+                                <span>📋 In Progress</span>
+                                <span class="task-count">3</span>
+                            </div>
+                            <div class="task-card" onclick="openTaskModal('Write documentation')">
+                                <div class="task-title">Write API documentation</div>
+                                <p style="color: #718096; font-size: 0.9rem; margin: 0.5rem 0;">Mobile App Development</p>
+                                <div class="task-meta">
+                                    <span>Due: Dec 20</span>
+                                    <div class="task-priority priority-medium">Medium</div>
+                                </div>
+                            </div>
+                            <div class="task-card" onclick="openTaskModal('Design wireframes')">
+                                <div class="task-title">Design wireframes</div>
+                                <p style="color: #718096; font-size: 0.9rem; margin: 0.5rem 0;">Website Redesign</p>
+                                <div class="task-meta">
+                                    <span>Due: Dec 18</span>
+                                    <div class="task-priority priority-medium">Medium</div>
+                                </div>
+                            </div>
+                            <div class="task-card" onclick="openTaskModal('Analytics implementation')">
+                                <div class="task-title">Implement tracking events</div>
+                                <p style="color: #718096; font-size: 0.9rem; margin: 0.5rem 0;">Analytics Dashboard</p>
+                                <div class="task-meta">
+                                    <span>Due: Nov 28</span>
+                                    <div class="task-priority priority-low">Low</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="kanban-column">
+                            <div class="column-header">
+                                <span>⏰ This Week</span>
+                                <span class="task-count">4</span>
+                            </div>
+                            <div class="task-card" onclick="openTaskModal('Team meeting')">
+                                <div class="task-title">Weekly team sync</div>
+                                <p style="color: #718096; font-size: 0.9rem; margin: 0.5rem 0;">General</p>
+                                <div class="task-meta">
+                                    <span>Due: Dec 13</span>
+                                    <div class="task-priority priority-low">Low</div>
+                                </div>
+                            </div>
+                            <div class="task-card" onclick="openTaskModal('Code review')">
+                                <div class="task-title">Code review session</div>
+                                <p style="color: #718096; font-size: 0.9rem; margin: 0.5rem 0;">Mobile App Development</p>
+                                <div class="task-meta">
+                                    <span>Due: Dec 14</span>
+                                    <div class="task-priority priority-medium">Medium</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="kanban-column">
+                            <div class="column-header">
+                                <span>✅ Completed</span>
+                                <span class="task-count">8</span>
+                            </div>
+                            <div class="task-card">
+                                <div class="task-title">Project kickoff meeting</div>
+                                <p style="color: #718096; font-size: 0.9rem; margin: 0.5rem 0;">Marketing Campaign</p>
+                                <div class="task-meta">
+                                    <span>Completed: Nov 28</span>
+                                    <div class="task-priority priority-high">High</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendar View -->
+                <div id="calendar-view" class="hidden">
+                    <div class="page-header">
+                        <h1 class="page-title">Calendar</h1>
+                        <p style="color: #718096; font-size: 1.1rem; margin-top: 0.5rem;">Timeline view of all your tasks and deadlines</p>
+                        <div class="page-actions">
+                            <button class="btn btn-secondary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                    <line x1="16" y1="2" x2="16" y2="6"/>
+                                    <line x1="8" y1="2" x2="8" y2="6"/>
+                                    <line x1="3" y1="10" x2="21" y2="10"/>
+                                </svg>
+                                Month
+                            </button>
+                            <button class="btn btn-secondary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                    <line x1="16" y1="2" x2="16" y2="6"/>
+                                    <line x1="8" y1="2" x2="8" y2="6"/>
+                                    <line x1="3" y1="10" x2="21" y2="10"/>
+                                </svg>
+                                Week
+                            </button>
+                            <button class="btn btn-primary" onclick="openTaskModal()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                Schedule Task
+                            </button>
+                        </div>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); padding: 3rem; border-radius: 20px; text-align: center; color: #003768; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                        </div>
+                        <h3 style="color: #003768; margin-bottom: 1rem;">Calendar Integration Coming Soon</h3>
+                        <p>We're working on an advanced calendar view with drag-and-drop scheduling, deadline tracking, and team availability.</p>
+                    </div>
+                </div>
+
+                <!-- Reports View -->
+                <div id="reports-view" class="hidden">
+                    <div class="page-header">
+                        <h1 class="page-title">Reports</h1>
+                        <p style="color: #718096; font-size: 1.1rem; margin-top: 0.5rem;">Analytics and insights for your projects</p>
+                        <div class="page-actions">
+                            <button class="btn btn-secondary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7,10 12,15 17,10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                                Export
+                            </button>
+                            <button class="btn btn-primary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="20" x2="12" y2="10"/>
+                                    <line x1="18" y1="20" x2="18" y2="4"/>
+                                    <line x1="6" y1="20" x2="6" y2="16"/>
+                                </svg>
+                                Generate Report
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid" style="margin-bottom: 2rem;">
+                        <div class="stat-card">
+                            <div class="stat-value">94%</div>
+                            <div class="stat-label">On-Time Completion</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">2.4</div>
+                            <div class="stat-label">Avg Days per Task</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">15</div>
+                            <div class="stat-label">Tasks This Week</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">87%</div>
+                            <div class="stat-label">Team Productivity</div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); padding: 3rem; border-radius: 20px; text-align: center; color: #003768; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="20" x2="12" y2="10"/>
+                                <line x1="18" y1="20" x2="18" y2="4"/>
+                                <line x1="6" y1="20" x2="6" y2="16"/>
+                            </svg>
+                        </div>
+                        <h3 style="color: #003768; margin-bottom: 1rem;">Advanced Analytics Dashboard</h3>
+                        <p>Detailed project analytics, team performance metrics, and custom reporting tools are being developed.</p>
+                    </div>
+                </div>
+
+                <!-- Settings View -->
+                <div id="settings-view" class="hidden">
+                    <div class="page-header">
+                        <h1 class="page-title">Settings</h1>
+                        <p style="color: #718096; font-size: 1.1rem; margin-top: 0.5rem;">Manage your account and preferences</p>
+                    </div>
+
+                    <div style="max-width: 600px;">
+                        <div style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); padding: 2rem; border-radius: 20px; margin-bottom: 2rem; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
+                            <h3 style="color: #003768; margin-bottom: 1rem; font-size: 1.3rem;">Profile Settings</h3>
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-input" value="John Doe">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-input" value="john.doe@company.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Job Title</label>
+                                <input type="text" class="form-input" value="Project Manager">
+                            </div>
+                            <button class="btn btn-primary">Save Changes</button>
+                        </div>
+
+                        <div style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); padding: 2rem; border-radius: 20px; margin-bottom: 2rem; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
+                            <h3 style="color: #003768; margin-bottom: 1rem; font-size: 1.3rem;">Notification Preferences</h3>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" checked style="accent-color: #003768;">
+                                    <span>Email notifications for new tasks</span>
+                                </label>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" checked style="accent-color: #003768;">
+                                    <span>Daily digest emails</span>
+                                </label>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" style="accent-color: #003768;">
+                                    <span>Browser push notifications</span>
+                                </label>
+                            </div>
+                            <button class="btn btn-primary">Update Preferences</button>
+                        </div>
+
+                        <div style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); padding: 2rem; border-radius: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
+                            <h3 style="color: #003768; margin-bottom: 1rem; font-size: 1.3rem;">Team Management</h3>
+                            <p style="color: #003768; margin-bottom: 1.5rem;">Invite team members and manage permissions</p>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="email" class="form-input" placeholder="Enter email address">
+                                </div>
+                                <button class="btn btn-primary" style="white-space: nowrap;">Send Invite</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Create New Task</h3>
+                <button class="close-btn" onclick="closeTaskModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="handleTaskSubmit(event)">
+                    <div class="form-group">
+                        <label class="form-label">Task Title</label>
+                        <input type="text" class="form-input" id="taskTitle" placeholder="Enter task title..." required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-textarea" id="taskDescription" placeholder="Describe the task..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Priority</label>
+                            <select class="form-select" id="taskPriority">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Assignee</label>
+                            <select class="form-select" id="taskAssignee">
+                                <option value="john">John Doe (Me)</option>
+                                <option value="sarah">Sarah Johnson</option>
+                                <option value="mike">Mike Chen</option>
+                                <option value="alex">Alex Rodriguez</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Project</label>
+                            <select class="form-select" id="taskProject">
+                                <option value="marketing">Marketing Campaign</option>
+                                <option value="website">Website Redesign</option>
+                                <option value="mobile">Mobile App Development</option>
+                                <option value="analytics">Analytics Dashboard</option>
+                                <option value="security">Security Audit</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Due Date</label>
+                            <input type="date" class="form-input" id="taskDueDate">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeTaskModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let currentView = 'dashboard';
+        let currentProject = null;
+
+        // Navigation functions
+        function showView(viewName) {
+            // Hide all views
+            document.querySelectorAll('[id$="-view"]').forEach(view => {
+                view.classList.add('hidden');
+            });
+            
+            // Show selected view
+            document.getElementById(viewName + '-view').classList.remove('hidden');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            event.currentTarget.classList.add('active');
+            
+            // Update breadcrumb
+            const breadcrumbText = viewName.charAt(0).toUpperCase() + viewName.slice(1);
+            document.getElementById('breadcrumb-text').textContent = breadcrumbText;
+            
+            currentView = viewName;
+        }
+
+        function openProject(projectId) {
+            const projectTitles = {
+                'marketing': 'Marketing Campaign',
+                'website': 'Website Redesign', 
+                'product': 'Product Launch',
+                'mobile': 'Mobile App Development',
+                'analytics': 'Analytics Dashboard',
+                'security': 'Security Audit'
+            };
+            
+            // Hide all views
+            document.querySelectorAll('[id$="-view"]').forEach(view => {
+                view.classList.add('hidden');
+            });
+            
+            // Show project view
+            document.getElementById('project-view').classList.remove('hidden');
+            
+            // Update project title
+            document.getElementById('project-title').textContent = projectTitles[projectId];
+            
+            // Update breadcrumb
+            document.getElementById('breadcrumb-text').textContent = `Projects > ${projectTitles[projectId]}`;
+            
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            currentProject = projectId;
+            currentView = 'project';
+        }
+
+        function createNewProject() {
+            alert('Create New Project feature coming soon! This would open a project creation wizard.');
+        }
+
+        function showUserMenu() {
+            alert('User menu coming soon! This would show logout, profile settings, and account options.');
+        }
+
+        // Task modal functions
+        function openTaskModal(taskTitle = '') {
+            const modal = document.getElementById('taskModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const taskTitleInput = document.getElementById('taskTitle');
+            
+            if (taskTitle) {
+                modalTitle.textContent = 'Edit Task';
+                taskTitleInput.value = taskTitle;
+            } else {
+                modalTitle.textContent = 'Create New Task';
+                taskTitleInput.value = '';
+            }
+            
+            // Set default due date to 1 week from now
+            const dueDate = new Date();
+            dueDate.setDate(dueDate.getDate() + 7);
+            document.getElementById('taskDueDate').value = dueDate.toISOString().split('T')[0];
+            
+            modal.classList.add('active');
+            taskTitleInput.focus();
+        }
+
+        function closeTaskModal() {
+            const modal = document.getElementById('taskModal');
+            modal.classList.remove('active');
+            
+            // Reset form
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskDescription').value = '';
+            document.getElementById('taskPriority').selectedIndex = 1;
+            document.getElementById('taskAssignee').selectedIndex = 0;
+            document.getElementById('taskDueDate').value = '';
+        }
+
+        function handleTaskSubmit(event) {
+            event.preventDefault();
+            
+            const taskData = {
+                title: document.getElementById('taskTitle').value,
+                description: document.getElementById('taskDescription').value,
+                priority: document.getElementById('taskPriority').value,
+                assignee: document.getElementById('taskAssignee').value,
+                project: document.getElementById('taskProject').value,
+                dueDate: document.getElementById('taskDueDate').value
+            };
+            
+            console.log('Creating task:', taskData);
+            
+            // In a real app, this would make an API call
+            alert(`Task "${taskData.title}" created successfully!`);
+            
+            closeTaskModal();
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeTaskModal();
+            }
+            
+            if (event.ctrlKey && event.key === 'k') {
+                event.preventDefault();
+                openTaskModal();
+            }
+        });
+
+        // Click outside modal to close
+        document.getElementById('taskModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeTaskModal();
+            }
+        });
+
+        // Initialize default date for new tasks
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            today.setDate(today.getDate() + 7);
+            document.getElementById('taskDueDate').value = today.toISOString().split('T')[0];
+        });
+
+        // Simulate real-time updates
+        function simulateRealtimeUpdates() {
+            setInterval(() => {
+                // Update progress bars slightly
+                const progressBars = document.querySelectorAll('.progress-fill');
+                progressBars.forEach(bar => {
+                    const currentWidth = parseInt(bar.style.width);
+                    if (currentWidth < 100 && Math.random() > 0.95) {
+                        bar.style.width = Math.min(currentWidth + 1, 100) + '%';
+                    }
+                });
+            }, 5000);
+        }
+
+        // Initialize the app
+        simulateRealtimeUpdates();
+    </script>
+</body>
+</html>
