@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow - Visual Prototype Mockup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Aptos Narrow', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #1a202c;
+            overflow-x: hidden;
+            padding: 2rem;
+        }
+
+        .showcase-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .hero-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #003768;
+            margin-bottom: 1rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: #4a5568;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .prototype-showcase {
+            perspective: 1200px;
+            position: relative;
+            min-height: 800px;
+            margin-bottom: 4rem;
+        }
+
+        .device-mockup {
+            position: absolute;
+            background: #1a1a1a;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .device-mockup:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Main desktop mockup */
+        .desktop-mockup {
+            width: 900px;
+            height: 600px;
+            top: 50px;
+            left: 100px;
+            transform: rotateY(-5deg) rotateX(5deg);
+            z-index: 3;
+        }
+
+        /* Tablet mockup */
+        .tablet-mockup {
+            width: 400px;
+            height: 300px;
+            top: 150px;
+            right: 50px;
+            transform: rotateY(15deg) rotateX(-10deg);
+            z-index: 2;
+        }
+
+        /* Mobile mockup */
+        .mobile-mockup {
+            width: 200px;
+            height: 350px;
+            bottom: 100px;
+            left: 50px;
+            transform: rotateY(-15deg) rotateX(10deg);
+            z-index: 1;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* TaskFlow Interface Components */
+        .taskflow-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(0, 55, 104, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .taskflow-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 800;
+            color: #003768;
+            font-size: 1.2rem;
+        }
+
+        .taskflow-nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: #4a5568;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: #003768;
+            color: white;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #003768, #E8E8E8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .taskflow-sidebar {
+            width: 250px;
+            background: rgba(0, 55, 104, 0.03);
+            height: calc(100% - 70px);
+            position: absolute;
+            left: 0;
+            top: 70px;
+            border-right: 1px solid rgba(0, 55, 104, 0.1);
+            padding: 2rem 0;
+        }
+
+        .sidebar-item {
+            padding: 0.75rem 2rem;
+            color: #4a5568;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(0, 55, 104, 0.1);
+            color: #003768;
+        }
+
+        .sidebar-item.active {
+            background: #003768;
+            color: white;
+            border-right: 3px solid #E8E8E8;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            height: calc(100% - 70px);
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .kanban-board {
+            display: flex;
+            gap: 1.5rem;
+            height: 100%;
+        }
+
+        .kanban-column {
+            background: rgba(247, 250, 252, 0.8);
+            border-radius: 12px;
+            padding: 1.5rem;
+            min-width: 280px;
+            flex: 1;
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: #003768;
+        }
+
+        .task-count {
+            background: rgba(0, 55, 104, 0.1);
+            color: #003768;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .task-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .task-title {
+            font-weight: 600;
+            color: #003768;
+            margin-bottom: 0.5rem;
+        }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+
+        .priority-high {
+            background: linear-gradient(135deg, #E8E8E8, #003768);
+            color: #003768;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+        }
+
+        .priority-medium {
+            background: linear-gradient(135deg, #003768, #E8E8E8);
+            color: #E8E8E8;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+        }
+
+        /* Mobile specific styles */
+        .mobile-screen {
+            padding: 1rem;
+        }
+
+        .mobile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .mobile-nav {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(0, 55, 104, 0.05);
+            padding: 0.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .mobile-nav-item {
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 6px;
+            color: #4a5568;
+            cursor: pointer;
+        }
+
+        .mobile-nav-item.active {
+            background: #003768;
+            color: white;
+        }
+
+        .mobile-task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .mobile-task-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Tablet specific styles */
+        .tablet-screen {
+            padding: 1.5rem;
+        }
+
+        .tablet-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            height: 100%;
+        }
+
+        .tablet-sidebar {
+            background: rgba(0, 55, 104, 0.03);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .tablet-main {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        /* Feature callouts */
+        .feature-callouts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border: 1px solid rgba(0, 55, 104, 0.1);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #003768, #E8E8E8);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: white;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #003768;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-description {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        /* Floating elements */
+        .floating-badge {
+            position: absolute;
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #003768;
+            border: 1px solid rgba(0, 55, 104, 0.1);
+        }
+
+        .badge-1 {
+            top: 20px;
+            right: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .badge-2 {
+            bottom: 30px;
+            left: 30px;
+            animation: float 3s ease-in-out infinite 1s;
+        }
+
+        .badge-3 {
+            top: 50%;
+            left: 20px;
+            animation: float 3s ease-in-out infinite 2s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .prototype-showcase {
+                transform: scale(0.8);
+                margin-bottom: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .prototype-showcase {
+                transform: scale(0.6);
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="showcase-container">
+        <div class="hero-header">
+            <h1 class="hero-title">TaskFlow Prototype</h1>
+            <p class="hero-subtitle">Modern project management tool with intuitive Kanban boards, team collaboration, and real-time analytics</p>
+        </div>
+
+        <div class="prototype-showcase">
+            <!-- Floating badges -->
+            <div class="floating-badge badge-1">✨ Real-time Sync</div>
+            <div class="floating-badge badge-2">🚀 Fast Performance</div>
+            <div class="floating-badge badge-3">📱 Mobile Ready</div>
+
+            <!-- Desktop Mockup -->
+            <div class="device-mockup desktop-mockup">
+                <div class="screen">
+                    <div class="taskflow-header">
+                        <div class="taskflow-logo">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 12l2 2 4-4"/>
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            </svg>
+                            TaskFlow
+                        </div>
+                        <div class="taskflow-nav">
+                            <a href="#" class="nav-link active">Dashboard</a>
+                            <a href="#" class="nav-link">Projects</a>
+                            <a href="#" class="nav-link">Teams</a>
+                            <a href="#" class="nav-link">Reports</a>
+                        </div>
+                        <div class="user-profile">
+                            <div class="avatar">JD</div>
+                        </div>
+                    </div>
+
+                    <div class="taskflow-sidebar">
+                        <div class="sidebar-item active">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="7" height="7"/>
+                                <rect x="14" y="3" width="7" height="7"/>
+                            </svg>
+                            Dashboard
+                        </div>
+                        <div class="sidebar-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            Marketing Campaign
+                        </div>
+                        <div class="sidebar-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            Website Redesign
+                        </div>
+                        <div class="sidebar-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            Product Launch
+                        </div>
+                    </div>
+
+                    <div class="main-content">
+                        <div class="kanban-board">
+                            <div class="kanban-column">
+                                <div class="column-header">
+                                    <span>📝 To Do</span>
+                                    <span class="task-count">3</span>
+                                </div>
+                                <div class="task-card">
+                                    <div class="task-title">Create social media assets</div>
+                                    <div class="task-meta">
+                                        <div class="avatar" style="width: 20px; height: 20px; font-size: 0.7rem;">S</div>
+                                        <div class="priority-high">High</div>
+                                    </div>
+                                </div>
+                                <div class="task-card">
+                                    <div class="task-title">Write blog post</div>
+                                    <div class="task-meta">
+                                        <div class="avatar" style="width: 20px; height: 20px; font-size: 0.7rem;">J</div>
+                                        <div class="priority-medium">Medium</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="kanban-column">
+                                <div class="column-header">
+                                    <span>🔄 In Progress</span>
+                                    <span class="task-count">2</span>
+                                </div>
+                                <div class="task-card">
+                                    <div class="task-title">Design landing page</div>
+                                    <div class="task-meta">
+                                        <div class="avatar" style="width: 20px; height: 20px; font-size: 0.7rem;">S</div>
+                                        <div class="priority-high">High</div>
+                                    </div>
+                                </div>
+                                <div class="task-card">
+                                    <div class="task-title">Setup email campaign</div>
+                                    <div class="task-meta">
+                                        <div class="avatar" style="width: 20px; height: 20px; font-size: 0.7rem;">M</div>
+                                        <div class="priority-medium">Medium</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="kanban-column">
+                                <div class="column-header">
+                                    <span>✅ Done</span>
+                                    <span class="task-count">4</span>
+                                </div>
+                                <div class="task-card">
+                                    <div class="task-title">Market research</div>
+                                    <div class="task-meta">
+                                        <div class="avatar" style="width: 20px; height: 20px; font-size: 0.7rem;">J</div>
+                                        <div class="priority-high">High</div>
+                                    </div>
+                                </div>
+                                <div class="task-card">
+                                    <div class="task-title">Competitor analysis</div>
+                                    <div class="task-meta">
+                                        <div class="avatar" style="width: 20px; height: 20px; font-size: 0.7rem;">K</div>
+                                        <div class="priority-medium">Medium</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tablet Mockup -->
+            <div class="device-mockup tablet-mockup">
+                <div class="screen tablet-screen">
+                    <div class="taskflow-header" style="padding: 0.75rem 1rem; font-size: 0.9rem;">
+                        <div class="taskflow-logo" style="font-size: 1rem;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 12l2 2 4-4"/>
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            </svg>
+                            TaskFlow
+                        </div>
+                        <div class="avatar" style="width: 28px; height: 28px; font-size: 0.8rem;">JD</div>
+                    </div>
+                    <div class="tablet-grid">
+                        <div class="tablet-sidebar">
+                            <div style="font-weight: 600; color: #003768; margin-bottom: 1rem; font-size: 0.9rem;">Projects</div>
+                            <div style="padding: 0.5rem 0; color: #4a5568; font-size: 0.85rem;">Marketing Campaign</div>
+                            <div style="padding: 0.5rem 0; color: #4a5568; font-size: 0.85rem;">Website Redesign</div>
+                            <div style="padding: 0.5rem 0; color: #4a5568; font-size: 0.85rem;">Product Launch</div>
+                        </div>
+                        <div class="tablet-main">
+                            <div style="font-weight: 600; color: #003768; margin-bottom: 1rem; font-size: 0.9rem;">Quick Stats</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                <div style="background: rgba(0, 55, 104, 0.05); padding: 1rem; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #003768;">12</div>
+                                    <div style="font-size: 0.8rem; color: #4a5568;">Active Projects</div>
+                                </div>
+                                <div style="background: rgba(0, 55, 104, 0.05); padding: 1rem; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #003768;">84</div>
+                                    <div style="font-size: 0.8rem; color: #4a5568;">Tasks Done</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Mockup -->
+            <div class="device-mockup mobile-mockup">
+                <div class="screen mobile-screen">
+                    <div class="mobile-header">
+                        <div class="taskflow-logo" style="font-size: 0.9rem;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 12l2 2 4-4"/>
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            </svg>
+                            TaskFlow
+                        </div>
+                        <div class="avatar" style="width: 24px; height: 24px; font-size: 0.7rem;">JD</div>
+                    </div>
+
+                    <div class="mobile-nav">
+                        <div class="mobile-nav-item active" style="font-size: 0.8rem;">Board</div>
+                        <div class="mobile-nav-item" style="font-size: 0.8rem;">List</div>
+                        <div class="mobile-nav-item" style="font-size: 0.8rem;">Calendar</div>
+                    </div>
+
+                    <div class="mobile-task-list">
+                        <div class="mobile-task-card">
+                            <div style="font-weight: 600; color: #003768; font-size: 0.85rem; margin-bottom: 0.25rem;">Create social media assets</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="avatar" style="width: 16px; height: 16px; font-size: 0.6rem;">S</div>
+                                <div class="priority-high" style="font-size: 0.6rem;">High</div>
+                            </div>
+                        </div>
+                        <div class="mobile-task-card">
+                            <div style="font-weight: 600; color: #003768; font-size: 0.85rem; margin-bottom: 0.25rem;">Design landing page</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="avatar" style="width: 16px; height: 16px; font-size: 0.6rem;">J</div>
+                                <div class="priority-medium" style="font-size: 0.6rem;">Medium</div>
+                            </div>
+                        </div>
+                        <div class="mobile-task-card">
+                            <div style="font-weight: 600; color: #003768; font-size: 0.85rem; margin-bottom: 0.25rem;">Write blog post</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="avatar" style="width: 16px; height: 16px; font-size: 0.6rem;">M</div>
+                                <div class="priority-medium" style="font-size: 0.6rem;">Medium</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-callouts">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Kanban Boards</h3>
+                <p class="feature-description">Visual task management with drag-and-drop functionality. Organize work into customizable columns and track progress in real-time.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Team Collaboration</h3>
+                <p class="feature-description">Seamless team communication with real-time updates, comments, file sharing, and @mentions to keep everyone aligned.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="20" x2="12" y2="10"/>
+                        <line x1="18" y1="20" x2="18" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="16"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Progress Analytics</h3>
+                <p class="feature-description">Comprehensive reporting and analytics to track team productivity, project timelines, and identify bottlenecks.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                        <line x1="8" y1="21" x2="16" y2="21"/>
+                        <line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Multi-Platform</h3>
+                <p class="feature-description">Access TaskFlow anywhere with responsive web design, native mobile apps, and desktop applications for maximum flexibility.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
